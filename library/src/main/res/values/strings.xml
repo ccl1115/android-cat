@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">log-floating</string>
+    <string name="no_permission">No permission to create a floating window</string>
+</resources>
