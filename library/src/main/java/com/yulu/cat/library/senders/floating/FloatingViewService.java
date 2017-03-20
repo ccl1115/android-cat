@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.yulu.cat.library.LevelDef;
 import com.yulu.cat.library.R;
 
 /**
@@ -39,7 +40,7 @@ public class FloatingViewService extends Service {
         super.onDestroy();
     }
 
-    void insert(String log) {
-        presenter.insert(log);
+    void insert(@LevelDef int level, String tag, String msg) {
+        presenter.insert(tag, msg, level);
     }
 }

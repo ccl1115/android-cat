@@ -3,6 +3,7 @@ package com.yulu.cat.library.senders.floating;
 import android.content.Context;
 import android.content.Intent;
 
+import com.yulu.cat.library.Cat;
 import com.yulu.cat.library.LevelDef;
 import com.yulu.cat.library.Sender;
 
@@ -40,40 +41,37 @@ public class FloatingWindowSender implements Sender {
 
     @Override
     public void log(String tag, @LevelDef int level, String msg) {
-        generalLog(tag, msg);
+        generalLog(level, tag, msg);
     }
 
     @Override
     public void v(String tag, String msg) {
-        generalLog(tag, msg);
+        generalLog(Cat.LEVEL_V, tag, msg);
     }
 
     @Override
     public void i(String tag, String msg) {
-        generalLog(tag, msg);
+        generalLog(Cat.LEVEL_I, tag, msg);
     }
 
     @Override
     public void d(String tag, String msg) {
-        generalLog(tag, msg);
+        generalLog(Cat.LEVEL_D, tag, msg);
     }
 
     @Override
     public void w(String tag, String msg) {
-        generalLog(tag, msg);
+        generalLog(Cat.LEVEL_W, tag, msg);
     }
 
     @Override
     public void e(String tag, String msg) {
-        generalLog(tag, msg);
+        generalLog(Cat.LEVEL_E, tag, msg);
     }
 
-    private synchronized void generalLog(String tag, String msg) {
+    private synchronized void generalLog(@LevelDef int level, String tag, String msg) {
         if (FloatingViewService.instance != null) {
-            for (String s : cache) {
-                FloatingViewService.instance.insert(s);
-            }
-            FloatingViewService.instance.insert(String.format("[%s] %s", tag, msg));
+            FloatingViewService.instance.insert(level, tag, msg);
         } else {
             cache.add(String.format("[%s] %s", tag, msg));
             checkService();

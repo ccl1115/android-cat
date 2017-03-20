@@ -2,6 +2,7 @@ package com.yulu.cat.library.senders.floating;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.provider.Settings;
@@ -17,6 +18,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.yulu.cat.library.Cat;
+import com.yulu.cat.library.LevelDef;
 import com.yulu.cat.library.R;
 
 import java.util.ArrayList;
@@ -126,9 +129,9 @@ class FloatingViewPresenter implements View.OnClickListener {
         }
     }
 
-    void insert(String log) {
+    void insert(String tag, String log, @LevelDef int level) {
         if (adapter != null) {
-            adapter.insert(log);
+            adapter.insert(tag, log, level);
             mRvContent.smoothScrollToPosition(adapter.getItemCount() - 1);
             mRoot.setVisibility(View.VISIBLE);
         }
@@ -136,25 +139,31 @@ class FloatingViewPresenter implements View.OnClickListener {
 
 
     private static class LogAdapter extends RecyclerView.Adapter<LogItemViewHolder> {
+        private String lastTag;
 
-        private void insert(String log) {
+        private void insert(String tag, String msg, @LevelDef int level) {
             if (data.size() > 100) {
                 data.remove(0);
             }
-            data.add(log);
+            if (tag.equals(lastTag)) {
+                data.add(new Item(level, "", msg));
+            } else {
+                data.add(new Item(level, tag, msg));
+            }
+            lastTag = tag;
         }
 
-        private List<String> data = new ArrayList<String>() {
+        private List<Item> data = new ArrayList<Item>() {
             @Override
-            public boolean add(String o) {
+            public boolean add(Item o) {
                 boolean add = super.add(o);
                 notifyItemInserted(size() - 1);
                 return add;
             }
 
             @Override
-            public String remove(int index) {
-                String remove = super.remove(index);
+            public Item remove(int index) {
+                Item remove = super.remove(index);
                 notifyItemRemoved(index);
                 return remove;
             }
@@ -169,7 +178,29 @@ class FloatingViewPresenter implements View.OnClickListener {
 
         @Override
         public void onBindViewHolder(LogItemViewHolder holder, int position) {
-            ((TextView) holder.itemView).setText(data.get(position));
+            Item item = data.get(position);
+            holder.mTvTag.setText(item.tag);
+            holder.mTvMsg.setText(item.msg);
+            holder.mTvTag.setBackgroundColor(item.tag.hashCode() | 0xFF000000);
+           switch (item.level) {
+                case Cat.LEVEL_ALL:
+                    break;
+                case Cat.LEVEL_D:
+                    holder.mTvMsg.setBackgroundColor(Color.BLUE);
+                    break;
+                case Cat.LEVEL_E:
+                    holder.mTvMsg.setBackgroundColor(Color.RED);
+                    break;
+                case Cat.LEVEL_I:
+                    holder.mTvMsg.setBackgroundColor(Color.CYAN);
+                    break;
+                case Cat.LEVEL_V:
+                    holder.mTvMsg.setBackgroundColor(Color.GRAY);
+                    break;
+                case Cat.LEVEL_W:
+                    holder.mTvMsg.setBackgroundColor(Color.YELLOW);
+                    break;
+            }
         }
 
         @Override
@@ -180,8 +211,27 @@ class FloatingViewPresenter implements View.OnClickListener {
 
     private static class LogItemViewHolder extends RecyclerView.ViewHolder {
 
+        private TextView mTvTag;
+        private TextView mTvMsg;
+
         LogItemViewHolder(View itemView) {
             super(itemView);
+            mTvTag = (TextView) itemView.findViewById(R.id.tv_tag);
+            mTvMsg = (TextView) itemView.findViewById(R.id.tv_msg);
+        }
+    }
+
+    private static class Item {
+        @LevelDef
+        int level;
+        String msg;
+        String tag;
+
+        Item(@LevelDef int level, String tag, String msg) {
+            this.level = level;
+            this.msg = msg;
+            this.tag = tag;
+
         }
     }
 }
